@@ -71,14 +71,14 @@ export default class Dispatch extends Component {
     }
 
     openGoogleMaps() {
-        if(/iPhone|iPad|Android/i.test(navigator.userAgent)) {
+        if(/iPhone|iPad|Android|Apple/i.test(navigator.userAgent)) {
             if(this.state.modalHeader == "Navigate to Patient") window.open(`comgooglemapsurl://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=${this.props.patientData.latitude},${this.props.patientData.longitude}`)
             else window.open(`comgooglemapsurl://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=${this.state.hospitalLat},${this.state.hospitalLng}`)
         } else {
             swal.fire({
                 icon: 'error',
                 title: 'Device not supported',
-                text: 'Google Maps is only supported on iOS and Andorid'
+                text: 'Google Maps is only supported on iOS and Android'
             })
         }
     }
@@ -107,7 +107,7 @@ export default class Dispatch extends Component {
     }
 
     openAppleMaps() {
-        if(/iPhone|iPad/i.test(navigator.userAgent)) {
+        if(/iPhone|iPad|Apple|Apple/i.test(navigator.userAgent)) {
             if(this.state.modalHeader == "Navigate to Patient") window.open(`https://maps.apple.com/maps?q=Patient%20Location&ll=${this.props.patientData.latitude},${this.props.patientData.longitude}&dirflg=d&t=h`)
             else window.open(`https://maps.apple.com/maps?q=Hospital&ll=${this.state.hospitalLat},${this.state.hospitalLng}&dirflg=d&t=h`)
         } else {
@@ -120,7 +120,7 @@ export default class Dispatch extends Component {
     }
 
     openWaze() {
-        if(/iPhone|iPad|Android/i.test(navigator.userAgent)) {
+        if(/iPhone|iPad|Android|Apple/i.test(navigator.userAgent)) {
             if(this.state.modalHeader == "Navigate to Patient") window.open(`https://www.waze.com/ul?ll=${this.props.patientData.latitude}%2C${this.props.patientData.longitude}&navigate=yes&zoom=17`)
             else window.open(`https://www.waze.com/ul?ll=${this.state.hospitalLat}%2C${this.state.hospitalLng}&navigate=yes&zoom=17`)
         } else {
