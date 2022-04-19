@@ -20,7 +20,7 @@ export class Case extends Component {
         await axios.get(`/case/getDetails/${this.state.id}`)
             .then(res => this.setState({patient: res.data.case}))
             
-        await axios.get(`/dispatch/getDispatchFromCase/${this.state.id}`)
+        axios.get(`/dispatch/getDispatchFromCase/${this.state.id}`)
             .then(res => this.setState({dispatchInfo: res.data.dispatch}))
 
         await axios.get(`/case/getAddress/${this.state.id}`)
@@ -34,7 +34,7 @@ export class Case extends Component {
 
         this.setState({symptoms: temp})
 
-        await axios.get(`/dispatch/getETA/${this.state.id}`)
+        axios.get(`/dispatch/getETA/${this.state.id}`)
         .then(res => this.setState({eta: res.data.eta}))
         .catch(() => this.setState({eta: "N/A"}))
     }

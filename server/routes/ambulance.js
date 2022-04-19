@@ -42,7 +42,6 @@ ambulanceRoutes.route('/api/ambulance/getHospital').get(async (req, res) => {
   if(req.session.authenticated) {
      let ambulance = await Ambulance.findOne({_id: req.session.user_id})
      let hospital = await Hospital.findOne({_id: ambulance.hospital})
-     console.log(hospital)
 
      let formatted_addr = `${hospital.hospital_name} ${hospital.address1} ${hospital.city} ${hospital.postcode}`
      const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${formatted_addr.trim()}&key=${process.env.GOOGLE_MAPS}`)

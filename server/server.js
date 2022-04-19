@@ -14,6 +14,7 @@ const io = new Server(server)
 var axios = require('axios');
 const Dispatch = require("./db/models/dispatch");
 const Case = require("./db/models/case");
+const { exit } = require("process");
 
 require("dotenv").config();
 

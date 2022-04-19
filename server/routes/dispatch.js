@@ -67,12 +67,12 @@ dispatchRoutes.route('/dispatch/getAllDispatches').get(async(req, res) => {
 
             await Dispatch.findOne({assigned_case: cases[i], completed: false})
             .then((result) => {
-                if(result.assigned_ambulance != null) {
+                if(result) {
                     assigned = true
                 }
             })
             .catch(err => {;})
-            if (addr != "") {
+            if (assigned) {
                 response.push({
                     id: id,
                     name: patientName,
@@ -115,13 +115,18 @@ dispatchRoutes.route('/dispatch/getETA/:id').get(async(req, res) => {
             assigned_case: req.params.id,
             completed: false
         })
-        if(dispatch) {
-            const c = await Case.findOne({_id: req.params.id})
-            const location = await Location.findOne({ambulance: dispatch.assigned_ambulance}).limit(1).sort({$natural:-1})
-            const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?region=uk&units=imperial&avoid=highways&traffic_model=best_guess&departure_time=${new Date().getTime().toString()}&origins=${location.latitude}%2C${location.longitude}&destinations=${c.latitude}%2C${c.longitude}
-            &key=${process.env.GOOGLE_MAPS}`)
-            res.json({'eta': googleMaps.data.rows[0].elements[0].duration.text})
-        } else res.status(404).json({'msg': 'Dispatch not found'})
+
+        if (dispatch) {
+            if(dispatch.assigned_ambulance) {
+                const c = await Case.findOne({_id: req.params.id})
+                const location = await Location.findOne({ambulance: dispatch.assigned_ambulance}).limit(1).sort({$natural:-1})
+                const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?region=uk&units=imperial&avoid=highways&traffic_model=best_guess&departure_time=${new Date().getTime().toString()}&origins=${location.latitude}%2C${location.longitude}&destinations=${c.latitude}%2C${c.longitude}
+                &key=${process.env.GOOGLE_MAPS}`)
+                res.json({'eta': googleMaps.data.rows[0].elements[0].duration.text})
+            } else res.status(404).json({'msg': 'Dispatch not found'})
+        } else {
+            res.status(404).json({'msg': 'Ambulance not assigned'})
+        }
     } else res.status(401).json({'msg': 'Session expired'})
 })
 

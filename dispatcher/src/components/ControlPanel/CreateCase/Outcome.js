@@ -60,7 +60,7 @@ export default class Outcome extends Component {
                 title: 'Success',
                 text: 'Case processed. Page will refresh in 5 seconds.'
             })
-            setTimeout(() => window.location.href = "/dashboard", 5000)
+            setTimeout(() => window.location.href = "/dispatcher/dashboard", 5000)
         } else {
             swal.fire({
                 icon: 'error',

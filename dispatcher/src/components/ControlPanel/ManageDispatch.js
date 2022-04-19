@@ -21,6 +21,7 @@ export default class ManageDispatch extends Component {
     }
     
     async cancelDispatch(id) {
+        console.log(id)
         swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -31,7 +32,7 @@ export default class ManageDispatch extends Component {
             confirmButtonText: 'Yes, cancel it!'
           }).then(async (result) => {
             if (result.isConfirmed) {
-              await axios.delete('/dispatch/delete', {id})
+              await axios.delete('/dispatch/delete', {data: {id}})
                 .then(res => {
                 if (res.data.status == 'OK') {
                     this.setState({dispatches: this.state.dispatches.filter(d => d.id != id)})
