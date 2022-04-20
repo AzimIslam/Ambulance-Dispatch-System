@@ -71,6 +71,7 @@ export default class Dispatch extends Component {
     }
 
     openGoogleMaps() {
+        this.props.travel()
         if(this.state.modalHeader == "Navigate to Patient") window.open(`https://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=${this.props.patientData.latitude},${this.props.patientData.longitude}`)
         else window.open(`https://www.google.com/maps/dir/?api=1&travelmode=driving&layer=traffic&destination=${this.state.hospitalLat},${this.state.hospitalLng}`)
     }
@@ -99,11 +100,13 @@ export default class Dispatch extends Component {
     }
 
     openAppleMaps() {
+        this.props.travel()
         if(this.state.modalHeader == "Navigate to Patient") window.open(`https://maps.apple.com/maps?q=Patient%20Location&ll=${this.props.patientData.latitude},${this.props.patientData.longitude}&dirflg=d&t=h`)
         else window.open(`https://maps.apple.com/maps?q=Hospital&ll=${this.state.hospitalLat},${this.state.hospitalLng}&dirflg=d&t=h`)
     }
 
     openWaze() {
+        this.props.travel()
         if(this.state.modalHeader == "Navigate to Patient") window.open(`https://www.waze.com/ul?ll=${this.props.patientData.latitude}%2C${this.props.patientData.longitude}&navigate=yes&zoom=17`)
         else window.open(`https://www.waze.com/ul?ll=${this.state.hospitalLat}%2C${this.state.hospitalLng}&navigate=yes&zoom=17`)
     }

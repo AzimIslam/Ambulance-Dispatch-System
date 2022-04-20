@@ -34,6 +34,14 @@ io.on('connection', (socket) => {
       users[socket.id] = { id: data.ambulanceId, busy: false, assigned_case: null }
     });
 
+    socket.on('travel', async function() {
+      users[socket.id].travelling = true
+    })
+
+    socket.on('not travelling', async function() {
+        users[socket.id].travelling = false
+    })
+
     socket.on('request dispatch', async function() {
       if(users[socket.id]) {
         if (users[socket.id].busy == false) {
@@ -61,13 +69,14 @@ io.on('connection', (socket) => {
                   console.log(`[Category 1]\tSending dispatch associated with case ${cat1[i]._id} to ambulance ${users[socket.id].id} (Estimated journey time: ${googleMaps.data.rows[0].elements[0].duration.text})`)
                   users[socket.id].assigned_case = dispatches[0]._id
                   users[socket.id].busy = true
+                  users[socket.id].travelling = false
                   io.to(socket.id).emit("assign dispatch", {googleMaps: googleMaps.data, assigned_case: users[socket.id].assigned_case, dispatch: cat1[i]})
                 }
               }
             }
           }
 
-          if (cat2.length > 0 && users[socket.id].assigned_case == null) {
+          else if (cat2.length > 0 && users[socket.id].assigned_case == null) {
             for(let i=0; i < cat2.length; i++) {
               const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?region=uk&units=imperial&avoid=highways&traffic_model=best_guess&departure_time=${new Date().getTime().toString()}&origins=${location[0].latitude}%2C${location[0].longitude}&destinations=${cat2[i].latitude}%2C${cat2[i].longitude}
               &key=${process.env.GOOGLE_MAPS}`)
@@ -79,6 +88,7 @@ io.on('connection', (socket) => {
                   console.log(`[Category 2]\tSending dispatch associated with case ${cat2[i]._id} to ambulance ${users[socket.id].id} (Estimated journey time: ${googleMaps.data.rows[0].elements[0].duration.text})`)
                   users[socket.id].assigned_case = dispatches[0]._id
                   users[socket.id].busy = true
+                  users[socket.id].travelling = false
                   io.to(socket.id).emit("assign dispatch", {googleMaps: googleMaps.data, assigned_case: users[socket.id].assigned_case, dispatch: cat2[i]})
                 }
               }
@@ -86,7 +96,7 @@ io.on('connection', (socket) => {
           }
 
           
-          if (cat3.length > 0 && users[socket.id].assigned_case == null) {
+          else if (cat3.length > 0 && users[socket.id].assigned_case == null) {
             for(let i=0; i < cat3.length; i++) {
               const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?region=uk&units=imperial&avoid=highways&traffic_model=best_guess&departure_time=${new Date().getTime().toString()}&origins=${location[0].latitude}%2C${location[0].longitude}&destinations=${cat3[i].latitude}%2C${cat3[i].longitude}
               &key=${process.env.GOOGLE_MAPS}`)
@@ -98,13 +108,14 @@ io.on('connection', (socket) => {
                   console.log(`[Category 3]\tSending dispatch associated with case ${cat4[i]._id} to ambulance ${users[socket.id].id} (Estimated journey time: ${googleMaps.data.rows[0].elements[0].duration.text})`)
                   users[socket.id].assigned_case = dispatches[0]._id
                   users[socket.id].busy = true
+                  users[socket.id].travelling = false
                   io.to(socket.id).emit("assign dispatch", {googleMaps: googleMaps.data, assigned_case: users[socket.id].assigned_case, dispatch: cat3[i]})
                 }
               }
             }
           }
 
-          if (cat4.length > 0 && users[socket.id].assigned_case == null) {
+          else if (cat4.length > 0 && users[socket.id].assigned_case == null) {
             for(let i=0; i < cat4.length; i++) {
               const googleMaps = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?region=uk&units=imperial&avoid=highways&traffic_model=best_guess&departure_time=${new Date().getTime().toString()}&origins=${location[0].latitude}%2C${location[0].longitude}&destinations=${cat4[i].latitude}%2C${cat4[i].longitude}
               &key=${process.env.GOOGLE_MAPS}`)
@@ -116,24 +127,29 @@ io.on('connection', (socket) => {
                   console.log(`[Category 4]\tSending dispatch associated with case ${cat4[i]._id} to ambulance ${users[socket.id].id} (Estimated journey time: ${googleMaps.data.rows[0].elements[0].duration.text})`)
                   users[socket.id].assigned_case = dispatches[0]._id
                   users[socket.id].busy = true
+                  users[socket.id].travelling = false
                   io.to(socket.id).emit("assign dispatch", {googleMaps: googleMaps.data, assigned_case: users[socket.id].assigned_case, dispatch: cat4[i]})
                 }
               }
             }
           }
         }
-
-      } else {
-        const dispatches = await Dispatch.find({_id: users[socket.id].assigned_case})
-        if(dispatches.length == 0) {
-          users[socket.id].assigned_case = null
-          users[socket.id].busy = false
-          io.to(socket.id).emit("assign dispatch", {googleMaps: {}, assigned_case: null, dispatch: null, cancelRequest: true})
-        } else {
-          if(dispatches[0].completed) {
+        else {
+          const dispatches = await Dispatch.find({_id: users[socket.id].assigned_case})
+          if(dispatches.length == 0) {
+            console.log(`Dispatch for case ${users[socket.id].assigned_case} has been cancelled`);
             users[socket.id].assigned_case = null
             users[socket.id].busy = false
-            io.to(socket.id).emit("assign dispatch", {googleMaps: {}, assigned_case: null, dispatch: null})
+            users[socket.id].travelling = false
+            io.to(socket.id).emit("assign dispatch", {googleMaps: {}, assigned_case: null, dispatch: null, cancelRequest: true})
+          } else {
+            if(dispatches[0].completed) {
+              console.log(`Dispatch for case ${users[socket.id].assigned_case} has been completed`);
+              users[socket.id].assigned_case = null
+              users[socket.id].busy = false
+              users[socket.id].travelling = false
+              io.to(socket.id).emit("assign dispatch", {googleMaps: {}, assigned_case: null, dispatch: null})
+            }
           }
         }
       }
@@ -144,7 +160,7 @@ io.on('connection', (socket) => {
         if (users[socket.id].assigned_case !== null) {
           const dispatches = await Dispatch.find({assigned_ambulance: users[socket.id].id, completed: false, _id: users[socket.id].assigned_case})
 
-          if (dispatches.length == 1) {
+          if (dispatches.length == 1 && !users[socket.id].travelling) {
             await Dispatch.updateOne({
               assigned_ambulance: users[socket.id].id, 
               completed: false, 
@@ -154,11 +170,12 @@ io.on('connection', (socket) => {
               assigned_ambulance: null
             }
             )
+            console.log(`Ambulance ${users[socket.id].id} has disconnected`)
+            delete users[socket.id] 
+          } else {
+            console.log(`Ambulance ${users[socket.id].id} is on the move to case ${users[socket.id].assigned_case}`)
           }
        }
-
-        console.log(`Ambulance ${users[socket.id].id} has disconnected`)
-        delete users[socket.id] 
       }
     })
 

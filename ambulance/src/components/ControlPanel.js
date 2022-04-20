@@ -25,15 +25,22 @@ export default class ControlPanel extends Component {
             locationEnabled: false
         }
         this.acceptDispatch = this.acceptDispatch.bind(this)
+        this.travel = this.travel.bind(this);
+        this.logout = this.logout.bind(this)
     }
 
     async logout() {
+        this.socket.emit('not travelling');
         await axios.post("/api/ambulance/logout")
             .then(res => window.location.href = "/ambulance/")
     }
 
     acceptDispatch() {
         this.setState({accepted: true})
+    }
+
+    async travel() {
+        this.socket.emit('travel')
     }
 
     async componentDidMount() {
@@ -67,7 +74,7 @@ export default class ControlPanel extends Component {
                     if (data.assigned_case) {
                         this.setState({assigned_case:  data.assigned_case, googleMaps: data.googleMaps, caseData: data.dispatch})
                         console.log(this.state.caseData)
-                    } else{
+                    } else {
                         if (this.state.accepted && data.cancelRequest) {
                             swal.fire({icon: 'error', title: 'Cancellation request', text: 'This dispatch has been cancelled'})
                         }
@@ -89,16 +96,16 @@ export default class ControlPanel extends Component {
                                     <Navbar.Brand className="mx-auto" style={{fontWeight: "bold", textTransform: "uppercase"}}>Ambulance Menu</Navbar.Brand>
                                 </Container>
                                 <a onClick={this.logout}>
-                                    <i class="bi bi-box-arrow-right" style={{fontSize: "1.5em", color: "white", marginRight: "1em"}}></i>
+                                    <i className="bi bi-box-arrow-right" style={{fontSize: "1.5em", color: "white", marginRight: "1em"}}></i>
                                 </a>
                             </Navbar>
                             { 
                             this.state.accepted == true ?
-                            <Dispatch mapData={this.state.googleMaps} patientData={this.state.caseData} />
+                            <Dispatch travel={this.travel} mapData={this.state.googleMaps} patientData={this.state.caseData} />
                             : this.state.assigned_case == null ?
                             <div className="mt-5 mx-auto d-flex align-items-center justify-content-center align-content-center flex-column">
                                 <h1 style={{fontWeight: "bold", textAlign: "center"}}>There are currently no dispatches</h1>
-                                <i class="bi bi-broadcast" style={{fontSize: "8em"}}></i>
+                                <i className="bi bi-broadcast" style={{fontSize: "8em"}}></i>
                                 <p className="mt-2" style={{ fontWeight: "light", textAlign: "center", fontSize: "1.25em"}}>
                                     Please standby while the system is processing dispatches...
                                 </p>
@@ -116,7 +123,7 @@ export default class ControlPanel extends Component {
                 <div id="app" style={{backgroundImage: `linear-gradient(0deg, rgba(255 255 255 / 54%), rgba(255 0 150 / 69%)), url(${background})`, backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundColor: "#add8e6", margin: 0}}>
                         <div className="mx-auto d-flex align-items-center justify-content-center align-content-center flex-column" style={{height: "100%"}}>
                             <h1 style={{color: "white", fontWeight: "bold", textAlign: "center"}}>Access Denied</h1>
-                            <i class="bi bi-lock" style={{fontSize: "8em", color: "white"}}></i>
+                            <i className="bi bi-lock" style={{fontSize: "8em", color: "white"}}></i>
                             <p className="mt-2" style={{color: "white", fontWeight: "light", textAlign: "center", fontSize: "1.25em"}}>
                                 It seems like you are not authenticated. Please log in, to access this page.
                             </p>
